@@ -30,3 +30,4 @@ Thumbs.db
 # Cache
 .cache/
 .pytest_cache/
+CLAUDE_zz_nutz.md
