@@ -1,319 +1,222 @@
-# KeyboardTrans
+# KeyboardTrans 🇹🇭⇌🔤
 
-Thai-English Keyboard Transliterator - A modular, testable Python library for converting between Thai and English keystrokes based on keyboard layout mappings.
+> **Fix Thai-English keyboard layout mistakes instantly.**  
+> Typed in the wrong language? Just run `kbt` and it's fixed.
+
+---
+
+## The Problem
+
+Thai developers and users constantly switch between Thai and English keyboard layouts.  
+One moment of forgetting to switch leads to gibberish like:
+
+```
+l;ylfu8iy[;yoouhgxHopy'w'[hk'
+```
+
+When you actually meant:
+
+```
+สวัสดีครับวันนี้เป็นยังไงบ้าง
+```
+
+**KeyboardTrans fixes this in milliseconds — locally, offline, with zero API calls.**
+
+---
+
+## Demo
+
+```bash
+$ kbt
+  KeyboardTrans — แก้ข้อความพิมพ์ผิด layout
+──────────────────────────────────────────────
+พิมพ์: l;ylfu8iy[ แสฟีกำ gxHopy'w'[hk'
+  → สวัสดีครับ claude เป็นยังไงบ้าง
+  📋 คัดลอกผลลัพธ์ไปยัง clipboard แล้ว
+
+พิมพ์: ;yoouhwx ทำำะรืเ dujF,'8iy[
+  → วันนี้ไป meeting กี่โมงครับ
+
+พิมพ์: Fxig0d9NgliH0c]h;8iy[
+  → โปรเจกต์เสร็จแล้วครับ
+```
+
+---
 
 ## Features
 
-- **Modular Architecture**: Clean separation of concerns with layout management, conversion logic, and scoring strategies
-- **Bijective Validation**: Ensures 1:1 EN ↔ TH mapping integrity at initialization
-- **Deterministic Behavior**: Same input always produces the same output
-- **Type Safety**: Full type hints throughout
-- **Extensible**: Strategy pattern for custom scoring algorithms
-- **Well-Tested**: Comprehensive pytest test suite (84 tests)
-- **Zero Dependencies**: Uses only Python standard library
+- ✅ **Bidirectional** — Thai→EN and EN→Thai
+- ✅ **Mixed input** — Handles Thai + English in the same sentence
+- ✅ **Smart detection** — Preserves real English words (`meeting`, `hello`, `ok`) automatically
+- ✅ **Number safe** — Pure numbers (`500`, `2024`) pass through unchanged
+- ✅ **Auto clipboard** — Result is copied to clipboard automatically (macOS)
+- ✅ **Offline** — No internet, no API, no tokens consumed
+- ✅ **Fast** — Runs in milliseconds, single Python file, zero dependencies
+- ✅ **macOS optimized** — Matches actual macOS Thai Kedmanee layout (`N` = `์`)
 
-### Scoring V3.1
-
-The library uses **WeightedScoringStrategy** (Scoring V3.1) with enhanced multi-factor scoring:
-
-**Weighted Scoring Formula:**
-```
-final_score = 0.35 * dictionary_score
-           + 0.20 * script_ratio_score
-           + 0.25 * validity_score
-           + 0.10 * boundary_score
-           - 0.10 * garbage_score
-```
-
-**Scoring Components:**
-- **Dictionary Score** (35%): Vocabulary matching
-- **Script Ratio Score** (20%): ASCII ratio detection for English, Thai Unicode ratio for Thai
-- **Validity Score** (25%): Valid word pattern recognition
-- **Boundary Score** (10%): Space ratio analysis
-- **Garbage Penalty** (-10%): Spam/repetition and symbol density penalties
-- **Vowelless Penalty** (V3.1): Detects ASCII without vowels as "garbage English"
-
-**Decision Logic (V3.1):**
-- Improvement-based layout inversion detection (0.08 threshold, reduced from 0.1)
-- Smart rescue for low-confidence text (0.12 threshold)
-- Vowelless penalty reduces English score for garbage text (0.6 threshold)
-- No hard script locks
-- No confidence threshold blocking conversions
-
-**Vocabulary Coverage:**
-- English: 90 common words
-- Thai: 90 common words
-
-**V3.1 Improvements:**
-- ✓ Reduced IMPROVEMENT_THRESHOLD from 0.1 to 0.08 (easier flips)
-- ✓ Added vowelless penalty to detect keyboard garbage
-- ✓ Added boundary score for space ratio analysis
-- ✓ Added layout noise score for symbol clustering
-- ✓ Added auto_correct() method with pythainlp integration
-- ✓ CLI uses segment-aware conversion (not WeightedScoringStrategy)
-- ✓ converter.py th_to_en() passes ASCII through unchanged (fixes comma issue)
-- ✓ No pythainlp dependency in CLI (uses TextConverter directly)
-- ✓ No machine learning - pure deterministic scoring
+---
 
 ## Installation
 
+**Requirements:** Python 3.6+ (no external dependencies)
+
 ```bash
-# From source
+# Clone the repo
+git clone https://github.com/Thanatvij/keyboardTrans.git
 cd keyboardTrans
-pip install -e .
 
-# For development
-pip install -e ".[dev]"
+# Install as global command (recommended)
+sudo cp KeyboardTran.py /usr/local/bin/kbt
+sudo chmod +x /usr/local/bin/kbt
+
+# Done! Run from anywhere
+kbt
 ```
 
-## Quick Start
-
-### Python API
-
-```python
-from keyboardtrans.config.layouts import get_kedmanee_layout
-from keyboardtrans.core.layout import KeyboardLayout
-from keyboardtrans.core.converter import TextConverter
-
-# Create layout and converter
-layout = KeyboardLayout("kedmanee", get_kedmanee_layout())
-converter = TextConverter(layout)
-
-# Convert text
-thai_text = converter.en_to_th("hello")
-english_keystrokes = converter.th_to_en("สวัสดี")
-
-print(thai_text)  # Converts English keystrokes to Thai characters
-```
-
-### Command Line
-
+**Update after editing:**
 ```bash
-# Run interactive CLI (with segment-aware conversion)
-python -m keyboardtrans.cli
-
-# Or use the installed command
-keyboardtrans
-
-# Enable verbose mode to see conversion mode
-python -m keyboardtrans.cli --verbose
+sudo cp KeyboardTran.py /usr/local/bin/kbt
 ```
 
-## Architecture
-
-```
-keyboardtrans/
-├── __init__.py           # Package exports
-├── cli.py                # Command-line interface (segment-aware conversion)
-├── exceptions.py         # Custom exceptions
-├── core/
-│   ├── layout.py         # Layout management and validation
-│   ├── converter.py      # Text conversion logic (ASCII pass-through in th_to_en)
-│   └── scoring.py         # Vocabulary-based scoring
-├── strategies/
-│   ├── base.py           # Abstract strategy interface
-│   ├── simple.py         # Simple scoring with built-in vocab (V1)
-│   └── weighted.py      # Weighted scoring with multi-factors (V3.1)
-└── config/
-    ├── layouts/
-    │   └── kedmanee.py   # Kedmanee layout definition
-    └── vocab/
-        ├── en_words.json  # English vocabulary
-        └── th_words.json  # Thai vocabulary
-```
+---
 
 ## Usage
 
-### Smart Conversion with Language Detection (V3.1)
-
-```python
-from keyboardtrans.cli import KeyboardTransApp
-
-# Create app with Kedmanee layout
-app = KeyboardTransApp()
-
-# Smart convert uses segment-aware conversion (Thai check → TH→EN, else EN→TH with token handling)
-# EN→TH mode preserves real EN words and pure digits, converts mixed input like "9kpsjk"
-result = app._smart_convert("hello")
-print(result)  # Returns corrected text
-```
-
-### Using Scoring V3.1 Directly
-
-```python
-from keyboardtrans.strategies.weighted import WeightedScoringStrategy
-from keyboardtrans.core.converter import TextConverter
-from keyboardtrans.core.layout import KeyboardLayout
-
-# Create layout and converter
-layout = KeyboardLayout("kedmanee", get_kedmanee_layout())
-converter = TextConverter(layout)
-
-# Use WeightedScoringStrategy (V3.1)
-strategy = WeightedScoringStrategy()
-th_score = strategy.score_thai("สวัสดีครับ")
-en_score = strategy.score_english("hello world")
-
-# Get language decision with improvement-based logic (V3.1)
-original = "สวัสดี"
-result, reason = strategy.auto_correct(original)
-
-print(f"Result: {result}")
-print(f"Reason: {reason}")  # e.g., "keep_original", "flipped_to_thai_strong", "flipped_to_english_strong"
-```
-
-### Custom Scoring Strategy
-
-```python
-from keyboardtrans.strategies.base import BaseScoringStrategy
-
-class MyScoringStrategy(BaseScoringStrategy):
-    def score_english(self, text: str) -> float:
-        # Your custom scoring logic
-        pass
-
-    def score_thai(self, text: str) -> float:
-        # Your custom scoring logic
-        pass
-
-# Use custom strategy
-from keyboardtrans.cli import KeyboardTransApp
-app = KeyboardTransApp()
-app._strategy = MyScoringStrategy()
-```
-
-### Multiple Layouts
-
-```python
-from keyboardtrans.core.layout import KeyboardLayout, LayoutRegistry
-
-# Create registry
-registry = LayoutRegistry()
-
-# Register layouts
-kedmanee = KeyboardLayout("kedmanee", get_kedmanee_layout())
-registry.register(kedmanee)
-
-# Retrieve layout
-layout = registry.get("kedmanee")
-```
-
-## Development
-
-### Running Tests
-
+### Interactive Mode (Recommended)
 ```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=keyboardtrans
-
-# Run specific test file
-pytest tests/test_layout.py
-
-# Run specific test
-pytest tests/test_converter.py::TestTextConverter::test_en_to_th_basic_conversion
+kbt
 ```
+Type your mixed-up text, press Enter. Result is printed and auto-copied to clipboard.
 
-### Code Quality
-
+### Clipboard Mode
 ```bash
-# Format code
-black .
-
-# Lint code
-ruff check .
-
-# Type checking
-mypy keyboardtrans
+# 1. Copy your garbled text first
+# 2. Press ↑ to recall last command (no need to re-copy!)
+kbt --clip
+# 3. Paste — result is already in clipboard
 ```
 
-## Keyboard Layouts
+### Direct Input
+```bash
+kbt "l;ylfu8iy[;yoouhgxHopy'w'[hk'"
+# → สวัสดีครับวันนี้เป็นยังไงบ้าง
+```
 
-### Thai Kedmanee
+---
 
-The library includes the Thai Kedmanee keyboard layout (TIS 820-2531). The mapping is validated for bijective (1:1) correspondence to enable proper bidirectional conversion.
+## How It Works
 
-### Adding New Layouts
+KeyboardTrans uses the **Thai Kedmanee keyboard layout** (TIS 820-2531) for deterministic character-by-character mapping.
 
-1. Create a new layout file in `config/layouts/`
-2. Define the EN → TH mapping dictionary
-3. Register the layout using `KeyboardLayout`
+### Detection Logic
 
-## API Reference
+```
+Input text
+    │
+    ├─ Contains Thai characters (U+0E00–U+0E7F)?
+    │       │
+    │      YES → TH→EN Mode (segment-aware)
+    │              ├─ Thai segment   → th_to_en()
+    │              └─ ASCII segment  → keep if real EN word
+    │                                  else → en_to_th()
+    │
+    └─    NO  → EN→TH Mode (token-by-token)
+                   ├─ Real EN word   → keep  ("meeting", "hello", "ok" ...)
+                   ├─ Pure number    → keep  (500, 2024)
+                   └─ Other token   → en_to_th()
+```
 
-### `KeyboardLayout`
+### Real-World Examples
 
-Represents a keyboard layout with bidirectional EN ↔ TH mapping.
+| Input (garbled) | Output (fixed) | Mode |
+|---|---|---|
+| `l;ylfu8iy[` | `สวัสดีครับ` | EN→TH |
+| `สวัสดีครับ` | `l;ylfu8iy[` | TH→EN |
+| `;yoouhwx ทำำะรืเ dujF,'8iy[` | `วันนี้ไป meeting กี่โมงครับ` | Mixed |
+| `-v[86I,kdg]p ิพน` | `ขอบคุณมากเลย bro` | Mixed |
+| `Fxig0d9NgliH0c]h;8iy[` | `โปรเจกต์เสร็จแล้วครับ` | EN→TH |
 
-**Methods:**
-- `__init__(name: str, en_to_th: Dict[str, str])`: Initialize layout
-- `property en_to_th`: Get EN → TH mapping (immutable)
-- `property th_to_en`: Get TH → EN mapping (immutable, computed lazily)
+### Key Technical Details
 
-### `TextConverter`
+**Collision fix:** Layout maps both `,` → `ม` and `}` → `,`, causing reverse-mapping collision.  
+Fixed with **first-seen-wins**:
+```python
+TH_TO_EN = {}
+for k, v in EN_TO_TH.items():
+    if v not in TH_TO_EN:
+        TH_TO_EN[v] = k
+```
 
-Converts text between English keystrokes and Thai characters.
+**ASCII pass-through:** `th_to_en()` skips ASCII characters (`ord(c) < 128`) so commas, spaces, and numbers survive intact.
 
-**Methods:**
-- `__init__(layout: KeyboardLayout)`: Initialize converter
-- `en_to_th(text: str) -> str`: Convert English to Thai
-- `th_to_en(text: str) -> str`: Convert Thai to English
+**macOS layout fix:** macOS Thai Kedmanee uses `N` = `์` (differs from generic TIS spec).
 
-### `WeightedScoringStrategy` (Scoring V3.1)
+---
 
-Enhanced weighted scoring strategy with multi-factor analysis and improvement-based decision logic.
+## Accuracy
 
-**Methods:**
-- `score_english(text: str) -> float`: Score as English [0, 1]
-- `score_thai(text: str) -> float`: Score as Thai [0, 1]
-- `auto_correct(text: str) -> Tuple[str, str]`: One-call correction using pythainlp (V3.1)
-- `get_language_decision(original, th_version, en_version) -> Tuple[str, str]`: Make final decision with improvement-based logic
+Tested on 20 real-world Thai-English mixed sentences:
 
-**Constants:**
-- `IMPROVEMENT_THRESHOLD = 0.08`: Minimum improvement required to flip (reduced from 0.1 in V2.1)
-- Rescue threshold: 0.12 improvement for low-confidence original (score < 0.45)
-- Vowelless penalty threshold: 0.6 reduces English score by 50% for garbage text
+```
+Pure Thai input    (10 cases) :  9/10  — 90%  exact match | 94%  char accuracy
+Mixed Thai+EN      (10 cases) : 10/10  — 100% exact match | 100% char accuracy
+─────────────────────────────────────────────────────────────────────────────
+Overall            (20 cases) : 19/20  — 95%  exact match | 97%  char accuracy
 
-### `SimpleScoringStrategy` (Scoring V1)
+Roundtrip test     (91 chars) : 83/91  — 91%  pass
+  └─ 8 failures = symbol collisions (/, -, ., %) — expected behavior
+  └─ Real sentences: 7/7 — 100% roundtrip
+```
 
-Simple scoring strategy with built-in vocabulary (retained for backward compatibility).
+Run tests yourself:
+```bash
+python3 accuracy_test.py
+python3 RoundTripTest.py
+```
 
-**Methods:**
-- `score_english(text: str) -> float`: Score as English [0, 1]
-- `score_thai(text: str) -> float`: Score as Thai [0, 1]
+---
 
-## Contributing
+## Project Files
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feat/amazing-feature`)
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass (`pytest`)
-6. Commit your changes
-7. Push to the branch (`git push origin feat/amazing-feature`)
-8. Open a Pull Request
+```
+keyboardTrans/
+├── KeyboardTran.py       # Main tool — everything in one file, no dependencies
+├── accuracy_test.py      # 20 real-world test cases with scoring
+├── RoundTripTest.py      # Roundtrip validation for all layout characters
+├── README.md             # This file
+├── README_th.md          # Thai documentation  
+└── PROJECT_CONTEXT.md    # Technical context for AI-assisted development
+```
 
-## License
+---
 
-MIT License - see LICENSE file for details.
+## Known Limitations
+
+| Case | Behavior | Reason |
+|---|---|---|
+| `fine` | Kept as-is | Ambiguous: English word or ฟิน? No context available |
+| Proper nouns (`Game`, `Bank`) | May convert | Not in real-EN word list |
+| Code blocks | Thai parts get converted | No code-block detection |
+| Pattachote layout | Not supported | Kedmanee only (for now) |
+
+---
 
 ## Roadmap
 
-- [x] Weighted multi-factor scoring (V3.1) - **COMPLETED**
-- [x] Vowelless penalty for garbage detection - **COMPLETED**
-- [x] Boundary score for space ratio analysis - **COMPLETED**
-- [x] Reduced IMPROVEMENT_THRESHOLD to 0.08 - **COMPLETED**
-- [x] CLI segment-aware conversion (not WeightedScoringStrategy) - **COMPLETED**
-- [x] converter.py ASCII pass-through in th_to_en - **COMPLETED**
 - [ ] Pattachote layout support
-- [ ] N-gram language model scoring
-- [ ] Beam search for ambiguous conversions
-- [ ] Web API
-- [ ] GUI application
+- [ ] Auto-update script (Makefile)
+- [ ] Browser extension
+- [ ] Expand real-EN word list
 
-## Acknowledgments
+---
 
-- Thai Industrial Standard TIS 820-2531 for Kedmanee layout specification
-- Original inspiration from the need to fix mixed-language keyboard input issues
+## License
+
+MIT License — Copyright (c) 2025 **ThanatV.**
+
+Free to use, copy, modify, and distribute. Just keep the copyright notice.
+
+---
+
+> **Built by [ThanatV.](https://github.com/Thanatvij)** — Digital Technology & Innovation, Thammasat University  
+> **AI pair-programmed with [Claude Sonnet 4.6](https://www.anthropic.com/claude) by Anthropic**
