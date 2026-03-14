@@ -1,3 +1,4 @@
+🇹🇭 ภาษาไทย | [🇬🇧 English](README.md)
 # KeyboardTrans 🇹🇭⇌🔤
 
 > แก้ข้อความที่พิมพ์ผิด keyboard layout ได้ทันที  

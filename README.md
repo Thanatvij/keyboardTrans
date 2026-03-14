@@ -1,3 +1,4 @@
+[🇹🇭 ภาษาไทย](README_th.md) | 🇬🇧 English
 # KeyboardTrans 🇹🇭⇌🔤
 
 > **Fix Thai-English keyboard layout mistakes instantly.**  
@@ -218,5 +219,6 @@ Free to use, copy, modify, and distribute. Just keep the copyright notice.
 
 ---
 
-> **Built by [ThanatV.](https://github.com/Thanatvij)** — Digital Technology & Innovation, Thammasat University  
+> **Built by [ThanatV.](https://github.com/Thanatvij)**  
+> Digital Technology and Innovation, Faculty of Science and Technology, Thammasat University  
 > **AI pair-programmed with [Claude Sonnet 4.6](https://www.anthropic.com/claude) by Anthropic**
