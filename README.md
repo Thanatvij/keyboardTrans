@@ -1,4 +1,4 @@
-[🇹🇭 ภาษาไทย](README_th.md) | 🇬🇧 English
+[🇹🇭 ภาษาไทย](README.th.md) | 🇬🇧 English
 # KeyboardTrans 🇹🇭⇌🔤
 
 > **Fix Thai-English keyboard layout mistakes instantly.**  
