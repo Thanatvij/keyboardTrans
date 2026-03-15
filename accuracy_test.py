@@ -4,8 +4,8 @@ accuracy_test.py — ทดสอบความแม่นยำของ Keyb
 รัน: python3 accuracy_test.py
 """
 
-import sys
-sys.path.insert(0, "/Users/thanatv./Desktop/Thanatv/Python/keyboardTrans/KeyboardTran.py")
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from KeyboardTran import fix
 

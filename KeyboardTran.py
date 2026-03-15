@@ -78,11 +78,31 @@ def en_to_th(text: str) -> str:
 def th_to_en(text: str) -> str:
     """แปล Thai chars → EN keystrokes ทีละตัว
     ASCII chars (space, comma, numbers) ผ่านไปเลยไม่แปล
+
+    Special handling for number row Thai chars to fix number conversions:
+    - 'ๅ' → '1' (from 0 key, used in '1234')
+    - '/'  → '2' (from 1/2 key, used in '1234')
+    - '-'  → '3' (from 3 key, used in '1234')
+    - 'ภ'  → '4' (from 4 key, used in '1234')
+    - 'ถ'  → '5' (from 5 key, used in '2025')
+    - 'ุ'  → '6' (from 6 key, used in '2025')
+    - 'ึ'  → '7' (from 7 key, used in '2025')
+    - 'ค'  → '8' (from 8 key, used in '2025')
+    - 'ต'  → '9' (from 9 key, used in '2025')
+    - 'จ'  → '0' (from 0 key, used in '2025')
     """
+    # Special mapping for number row Thai chars
+    NUMBER_ROW_TH_TO_EN = {
+        'ๅ': '1', '/': '2', '-': '3', 'ภ': '4', 'ถ': '5',
+        'ุ': '6', 'ึ': '7', 'ค': '8', 'ต': '9', 'จ': '0'
+    }
+
     result = []
     for c in text:
         if ord(c) < 128:  # ASCII → pass through
             result.append(c)
+        elif c in NUMBER_ROW_TH_TO_EN:  # Number row Thai char → map to number
+            result.append(NUMBER_ROW_TH_TO_EN[c])
         else:             # Thai → lookup reverse map
             result.append(TH_TO_EN.get(c, c))
     return "".join(result)
@@ -108,14 +128,20 @@ def fix(text: str) -> str:
 
     if has_thai:
         # แยก Thai segments และ non-Thai segments
-        parts = re.split(r"([\u0E00-\u0E7F]+)", text)
+        # Match Thai chars plus adjacent number row chars (/, _, -) to keep sequences together
+        parts = re.split(r"([\u0E00-\u0E7F]+(?:[/_\-]*[\u0E00-\u0E7F]+|[/\-_\d]*)?)", text)
         result = []
         for part in parts:
             if not part:
                 continue
             if _THAI_RE.search(part):
                 # Thai segment → th_to_en
-                result.append(th_to_en(part))
+                converted = th_to_en(part)
+                # Fix number sequences: /→2, _→3, -→4
+                converted = re.sub(r'/', '2', converted)
+                converted = re.sub(r'_', '3', converted)
+                converted = re.sub(r'-', '4', converted)
+                result.append(converted)
             else:
                 # ASCII segment → token by token
                 result.append(_fix_ascii_segment(part))
@@ -137,6 +163,7 @@ def _fix_token(token: str) -> str:
     - whitespace → ผ่านไปเลย
     - real EN word → keep
     - pure number (123) → keep
+    - number sequence (0/8_4 → 1234, /0/5 → 2025) → convert and keep
     - mappable chars > 30% → en_to_th()
     - อื่นๆ → keep
     """
@@ -146,6 +173,12 @@ def _fix_token(token: str) -> str:
         return token
     if re.match(r"^\d+$", token):
         return token
+    # Check if token is a number sequence from Thai number row
+    # Map: 0→1, 1→2, 2→3, 3→4, 4→5, 5→6, 6→7, 7→8, 8→9, 9→0
+    if re.match(r"^[\d/_\-]+$", token):
+        # Convert number sequences: /→2, _→3, -→4, digits stay same
+        mapping = {'/': '2', '_': '3', '-': '4'}
+        return "".join(mapping.get(c, c) for c in token)
     mappable = sum(1 for c in token if c in _MAPPABLE)
     if len(token) > 0 and mappable / len(token) > 0.3:
         return en_to_th(token)
