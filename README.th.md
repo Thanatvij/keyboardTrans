@@ -109,9 +109,10 @@ kbt "ข้อความที่พิมพ์ผิด"
 ## ผลการทดสอบ
 
 ```
-ไทยล้วน        (10 cases) :  9/10  — 90%  exact | 94%  char accuracy
+ไทยล้วน        (10 cases) : 10/10 — 100% exact | 100% char accuracy
 ผสมไทย+EN      (10 cases) : 10/10  — 100% exact | 100% char accuracy
-รวม            (20 cases) : 19/20  — 95%  exact | 97%  char accuracy
+รวม            (27 cases) : 27/27 — 100% exact | 100% char accuracy
+:ตัวเลขผสม    (7 cases)  :  7/7  — 100% exact | 100% char accuracy
 ```
 
 ---

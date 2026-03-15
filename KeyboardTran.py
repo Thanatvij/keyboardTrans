@@ -96,6 +96,11 @@ def th_to_en(text: str) -> str:
         'ๅ': '1', '/': '2', '-': '3', 'ภ': '4', 'ถ': '5',
         'ุ': '6', 'ึ': '7', 'ค': '8', 'ต': '9', 'จ': '0'
     }
+    # Thai digits to their ASCII numeric values
+    THAI_DIGIT_TO_ASCII = {
+        '๐': '0', '๑': '1', '๒': '2', '๓': '3', '๔': '4',
+        '๕': '5', '๖': '6', '๗': '7', '๘': '8', '๙': '9'
+    }
 
     result = []
     for c in text:
@@ -103,6 +108,8 @@ def th_to_en(text: str) -> str:
             result.append(c)
         elif c in NUMBER_ROW_TH_TO_EN:  # Number row Thai char → map to number
             result.append(NUMBER_ROW_TH_TO_EN[c])
+        elif c in THAI_DIGIT_TO_ASCII:  # Thai digit → map to ASCII digit
+            result.append(THAI_DIGIT_TO_ASCII[c])
         else:             # Thai → lookup reverse map
             result.append(TH_TO_EN.get(c, c))
     return "".join(result)

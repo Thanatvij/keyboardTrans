@@ -126,9 +126,10 @@ Thai Kedmanee (TIS 820-2531) — macOS version
 
 ```
 accuracy_test.py:
-  Pure Thai    (10 cases) :  9/10  — 90%  exact match | 94%  char accuracy
-  Mixed TH+EN  (10 cases) : 10/10  — 100% exact match | 100% char accuracy
-  Overall      (20 cases) : 19/20  — 95%  exact match | 97%  char accuracy
+  Pure Thai       (10 cases) : 10/10 — 100% exact match | 100% char accuracy
+  Mixed TH+EN     (10 cases) : 10/10 — 100% exact match | 100% char accuracy
+  Numbers Mixed    (7 cases)  :  7/7  — 100% exact match | 100% char accuracy
+  Overall         (27 cases) : 27/27 — 100% exact match | 100% char accuracy
 
 RoundTripTest.py:
   EN→TH→EN roundtrip : 83/91 — 91% pass

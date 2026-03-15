@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-accuracy_test.py — ทดสอบความแม่นยำของ KeyboardTran.py
-รัน: python3 accuracy_test.py
-"""
 
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +34,17 @@ MIXED = [
     ("ยพน่ำแะ ouh กำฟกสรืำ ;yoL6diNot",     "project นี้ deadline วันศุกร์นะ"),
     ("-v[86I,kdg]p ิพน",                    "ขอบคุณมากเลย bro"),
     (";yoouh ไนพา ดพนท ้นทำ 8iy[",          "วันนี้ work from home ครับ"),
+]
+
+# --- Numbers Mixed (ตัวเลขผสม) ---
+NUMBER_MIXED = [
+    ("l;ylfu8iy[ ๅ/_ภ",         "สวัสดีครับ 1234"),
+    ("z,vkp6 ๅจ -;[",           "ผมอายุ 10 ขวบ"),
+    ("ik8k ถจจ [km",             "ราคา 500 บาท"),
+    (";yomuj ๅถ ,uok8, /จ/ถ",   "วันที่ 15 มีนาคม 2025"),
+    ("z,gdbfxu /ถภึ",            "ผมเกิดปี 2547"),
+    ("Fmi จคๅ/_ภถุึค",          "โทร 0812345678"),
+    ("shv' _จภ =yho _",          "ห้อง 304 ชั้น 3"),
 ]
 
 
@@ -96,10 +102,11 @@ def run_tests(dataset, label):
 if __name__ == "__main__":
     e1, t1, c1 = run_tests(PURE_THAI, "Pure Thai (พิมพ์ผิด layout ทั้งหมด)")
     e2, t2, c2 = run_tests(MIXED,     "Mixed Thai+EN (ผสม)")
+    e3, t3, c3 = run_tests(NUMBER_MIXED, "Numbers Mixed (ตัวเลขผสม)")
 
-    total_exact = e1 + e2
-    total_cases = t1 + t2
-    avg_char = (c1 * t1 + c2 * t2) / total_cases
+    total_exact = e1 + e2 + e3
+    total_cases = t1 + t2 + t3
+    avg_char = (c1 * t1 + c2 * t2 + c3 * t3) / total_cases
 
     print(f"\n{'='*60}")
     print(f"  OVERALL RESULTS")
